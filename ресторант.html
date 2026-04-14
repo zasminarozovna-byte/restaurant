@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Мировая кухня</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #3a3a5a);
+    color: white;
+}
+
+header {
+    text-align: center;
+    padding: 30px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* МЕНЮ */
+.menu {
+    width: 70%;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+    justify-content: center;
+}
+
+.card {
+    background: #2a2a40;
+    border-radius: 15px;
+    margin: 15px;
+    width: 260px;
+    overflow: hidden;
+    transition: 0.3s;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.card:hover {
+    transform: translateY(-10px) scale(1.03);
+}
+
+.card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+.card h3 {
+    margin: 10px;
+}
+
+.card p {
+    margin: 10px;
+    color: #aaa;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 10px;
+}
+
+.controls button {
+    padding: 5px 12px;
+    border: none;
+    border-radius: 5px;
+    background: #ff9800;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.controls span {
+    min-width: 20px;
+    text-align: center;
+}
+
+.add-btn {
+    margin: 10px;
+    padding: 10px;
+    width: 90%;
+    border: none;
+    background: #4caf50;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* КОРЗИНА */
+.cart {
+    width: 30%;
+    background: #1c1c2b;
+    padding: 20px;
+    border-left: 2px solid #444;
+}
+
+.cart h2 {
+    margin-bottom: 10px;
+}
+
+.cart-item {
+    margin: 10px 0;
+    padding: 10px;
+    background: #2f2f4f;
+    border-radius: 8px;
+}
+
+.total {
+    margin-top: 15px;
+    font-size: 18px;
+}
+
+.checkout {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    background: #2196f3;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* МОБИЛКА */
+@media (max-width: 900px) {
+    .menu { width: 100%; }
+    .cart { width: 100%; }
+}
+</style>
+
+</head>
+
+<body>
+
+<header>🌍 Ресторан "Мировая кухня"</header>
+
+<div class="container">
+
+<div class="menu" id="menu"></div>
+
+<div class="cart">
+<h2>🛒 Корзина</h2>
+<div id="cart"></div>
+<div class="total">Итого: <span id="total">0</span> ₸</div>
+<button class="checkout" onclick="checkout()">Оформить чек</button>
+</div>
+
+</div>
+
+<script>
+const dishes = [
+    {name: "Суши", price: 3000, img: "https://source.unsplash.com/300x200/?sushi"},
+    {name: "Паста Карбонара", price: 3500, img: "https://source.unsplash.com/300x200/?pasta"},
+    {name: "Тако", price: 2500, img: "https://source.unsplash.com/300x200/?tacos"},
+    {name: "Пицца", price: 4000, img: "https://source.unsplash.com/300x200/?pizza"},
+    {name: "Рамен", price: 3200, img: "https://source.unsplash.com/300x200/?ramen"},
+    {name: "Круассан", price: 1500, img: "https://source.unsplash.com/300x200/?croissant"}
+];
+
+let cart = [];
+
+function renderMenu() {
+    const menu = document.getElementById("menu");
+    dishes.forEach((dish, i) => {
+        dish.count = 1;
+        menu.innerHTML += `
+        <div class="card">
+            <img src="${dish.img}">
+            <h3>${dish.name}</h3>
+            <p>${dish.price} ₸</p>
+
+            <div class="controls">
+                <button onclick="changeCount(${i}, -1)">-</button>
+                <span id="count-${i}">1</span>
+                <button onclick="changeCount(${i}, 1)">+</button>
+            </div>
+
+            <button class="add-btn" onclick="addToCart(${i})">Добавить</button>
+        </div>`;
+    });
+}
+
+function changeCount(i, delta) {
+    dishes[i].count += delta;
+    if (dishes[i].count < 1) dishes[i].count = 1;
+    document.getElementById("count-" + i).innerText = dishes[i].count;
+}
+
+function addToCart(i) {
+    cart.push({...dishes[i]});
+    renderCart();
+}
+
+function renderCart() {
+    const cartDiv = document.getElementById("cart");
+    cartDiv.innerHTML = "";
+    let total = 0;
+
+    cart.forEach(item => {
+        let sum = item.price * item.count;
+        total += sum;
+        cartDiv.innerHTML += `
+        <div class="cart-item">
+            ${item.name} x${item.count} = ${sum} ₸
+        </div>`;
+    });
+
+    document.getElementById("total").innerText = total;
+}
+
+function checkout() {
+    if (cart.length === 0) {
+        alert("Корзина пустая");
+        return;
+    }
+
+    let receipt = "🧾 Чек:\n\n";
+    let total = 0;
+
+    cart.forEach(item => {
+        let sum = item.price * item.count;
+        receipt += `${item.name} x${item.count} = ${sum} ₸\n`;
+        total += sum;
+    });
+
+    receipt += `\nИтого: ${total} ₸`;
+
+    alert(receipt);
+    cart = [];
+    renderCart();
+}
+
+renderMenu();
+</script>
+
+</body>
+</html>
